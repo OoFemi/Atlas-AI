@@ -57,10 +57,11 @@ if ($isLoggedIn) {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13.5px;
     background: var(--bg-light);
     color: var(--text-light);
     margin: 0;
-    padding: 40px;
+    padding: 25px;
     transition: background 0.3s, color 0.3s;
 }
 
@@ -70,11 +71,11 @@ body.dark-mode {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 700px;
     margin: auto;
     background: var(--card-light);
-    padding: 30px;
-    border-radius: 12px;
+    padding: 25px;
+    border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     transition: background 0.3s, box-shadow 0.3s;
 }
@@ -85,8 +86,8 @@ body.dark-mode .container {
 }
 
 .section {
-    margin-bottom: 25px;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -94,23 +95,30 @@ body.dark-mode .section {
     border-bottom: 1px solid var(--border-dark);
 }
 
-h1, h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
 h1 {
-    font-size: 1.8rem;
+    font-size: 1.35rem;
+    margin-top: 0;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
+
+h2 {
+    font-size: 1.05rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+p {
+    margin: 5px 0;
 }
 
 label {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 12px 0;
+    margin: 8px 0;
     cursor: pointer;
 }
 
@@ -118,10 +126,11 @@ button {
     background: var(--primary-blue);
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 0.9rem;
     transition: opacity 0.2s;
 }
 
@@ -134,6 +143,7 @@ button:hover {
     text-decoration: none;
     color: var(--primary-blue);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
 .back-link:hover {
@@ -146,12 +156,12 @@ button:hover {
     right: 30px;
     background: #323232;
     color: #fff;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     display: none;
     z-index: 1000;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .toast.success {
