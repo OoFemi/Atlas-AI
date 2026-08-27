@@ -2,285 +2,192 @@
 session_start();
 require_once 'db.php';
 
-$isLoggedIn = isset($_SESSION['user_id']);
+// Ensure user is logged in
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit();
+}
 
-$user = [
-    'username' => 'Guest User',
-    'department' => '-',
-    'role' => 'Guest',
-    'theme' => 'system',
-    'response_style' => 'balanced',
-    'last_login' => '-'
-];
+$username = $_SESSION['username'];
+$success_message = '';
+$error_message = '';
 
-if ($isLoggedIn) {
-    $userId = $_SESSION['user_id'];
-    $stmt = $conn->prepare("
-        SELECT 
-            username, 
-            department, 
-            role, 
-            theme, 
-            response_style, 
-            last_login 
-        FROM users 
-        WHERE id = ?
-    ");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($row = $result->fetch_assoc()) {
-        $user = $row;
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $theme = $_POST['theme'] ?? 'system';
+    $response_style = $_POST['response_style'] ?? 'balanced';
+
+    $stmt = $conn->prepare("UPDATE users SET theme = ?, response_style = ? WHERE username = ?");
+    if ($stmt) {
+        $stmt->bind_param("sss", $theme, $response_style, $username);
+        if ($stmt->execute()) {
+            $success_message = "Settings updated successfully.";
+        } else {
+            $error_message = "Failed to update settings: " . $stmt->error;
+        }
+        $stmt->close();
+    } else {
+        $error_message = "Database error: " . $conn->error;
     }
+}
+
+// Fetch user details
+$stmt = $conn->prepare("SELECT username, department, role, last_login, theme, response_style FROM users WHERE username = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$stmt->close();
+
+// Fallbacks if user record is missing fields
+if (!$user) {
+    $user = [
+        'username' => $username,
+        'department' => 'General',
+        'role' => 'user',
+        'last_login' => null,
+        'theme' => 'system',
+        'response_style' => 'balanced'
+    ];
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>FOB-AI - User Settings</title>
-<style>
-:root {
-    --primary-blue: #1a73e8;
-    --accent-red: #d93025;
-    --bg-light: #f5f6fa;
-    --card-light: #ffffff;
-    --text-light: #202124;
-    --border-light: #e0e0e0;
-    
-    --bg-dark: #1e1f2b;
-    --card-dark: #11131d;
-    --text-dark: #ffffff;
-    --border-dark: #2f3246;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 13.5px;
-    background: var(--bg-light);
-    color: var(--text-light);
-    margin: 0;
-    padding: 25px;
-    transition: background 0.3s, color 0.3s;
-}
-
-body.dark-mode {
-    background: var(--bg-dark);
-    color: var(--text-dark);
-}
-
-.container {
-    max-width: 700px;
-    margin: auto;
-    background: var(--card-light);
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: background 0.3s, box-shadow 0.3s;
-}
-
-body.dark-mode .container {
-    background: var(--card-dark);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-body.dark-mode .section {
-    border-bottom: 1px solid var(--border-dark);
-}
-
-h1 {
-    font-size: 1.35rem;
-    margin-top: 0;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-h2 {
-    font-size: 1.05rem;
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-
-p {
-    margin: 5px 0;
-}
-
-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 8px 0;
-    cursor: pointer;
-}
-
-button {
-    background: var(--primary-blue);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: opacity 0.2s;
-}
-
-button:hover {
-    opacity: 0.9;
-}
-
-.back-link {
-    margin-left: 15px;
-    text-decoration: none;
-    color: var(--primary-blue);
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.back-link:hover {
-    text-decoration: underline;
-}
-
-.toast {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #323232;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    display: none;
-    z-index: 1000;
-    font-size: 0.9rem;
-}
-
-.toast.success {
-    background: #137333;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>User Settings - FOB-AI</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 0;
+            color: #f0f6fc;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #f0f6fc;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .info-block {
+            font-size: 14px;
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+        .info-block span {
+            color: #c9d1d9;
+            font-weight: 500;
+        }
+        .radio-group {
+            margin: 10px 0;
+        }
+        .radio-group label {
+            display: block;
+            color: #c9d1d9;
+            font-size: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .radio-group input {
+            margin-right: 8px;
+        }
+        .btn-save {
+            background-color: #1f6feb;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn-save:hover {
+            background-color: #388bfd;
+        }
+        .back-link {
+            color: #58a6ff;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background-color: rgba(46, 160, 67, 0.15);
+            border: 1px solid rgba(46, 160, 67, 0.4);
+            color: #3fb950;
+        }
+        .alert-error {
+            background-color: rgba(248, 81, 73, 0.15);
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            color: #f85145;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>⚙️ User Settings</h1>
 
-<div class="container">
-    <h1>⚙ User Settings</h1>
-
-    <div class="section">
-        <h2>Account Information</h2>
-        <p><strong>Username:</strong> <?php echo htmlspecialchars($user['username']); ?></p>
-        <?php if($isLoggedIn): ?>
-            <p><strong>Department:</strong> <?php echo htmlspecialchars($user['department']); ?></p>
-            <p><strong>Role:</strong> <?php echo htmlspecialchars($user['role']); ?></p>
-            <p><strong>Last Login:</strong> <?php echo htmlspecialchars($user['last_login']); ?></p>
-        <?php else: ?>
-            <p><strong>Role:</strong> Guest</p>
+        <?php if (!empty($success_message)): ?>
+            <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
         <?php endif; ?>
+
+        <?php if (!empty($error_message)): ?>
+            <div class="alert alert-error"><?php echo htmlspecialchars($error_message); ?></div>
+        <?php endif; ?>
+
+        <form method="POST" action="">
+            <h2>Account Information</h2>
+            <div class="info-block">Username: <span><?php echo htmlspecialchars($user['username'] ?? ''); ?></span></div>
+            <div class="info-block">Department: <span><?php echo htmlspecialchars($user['department'] ?? 'General'); ?></span></div>
+            <div class="info-block">Role: <span><?php echo htmlspecialchars($user['role'] ?? 'user'); ?></span></div>
+            <div class="info-block">Last Login: <span><?php echo htmlspecialchars($user['last_login'] ?? 'Never'); ?></span></div>
+
+            <h2>Appearance</h2>
+            <div class="radio-group">
+                <label><input type="radio" name="theme" value="light" <?php echo (($user['theme'] ?? 'system') === 'light') ? 'checked' : ''; ?>> Light</label>
+                <label><input type="radio" name="theme" value="dark" <?php echo (($user['theme'] ?? 'system') === 'dark') ? 'checked' : ''; ?>> Dark</label>
+                <label><input type="radio" name="theme" value="system" <?php echo (($user['theme'] ?? 'system') === 'system') ? 'checked' : ''; ?>> System Default</label>
+            </div>
+
+            <h2>AI Response Style</h2>
+            <div class="radio-group">
+                <label><input type="radio" name="response_style" value="concise" <?php echo (($user['response_style'] ?? 'balanced') === 'concise') ? 'checked' : ''; ?>> Concise</label>
+                <label><input type="radio" name="response_style" value="balanced" <?php echo (($user['response_style'] ?? 'balanced') === 'balanced') ? 'checked' : ''; ?>> Balanced</label>
+                <label><input type="radio" name="response_style" value="detailed" <?php echo (($user['response_style'] ?? 'balanced') === 'detailed') ? 'checked' : ''; ?>> Detailed</label>
+            </div>
+
+            <h2>About FOB-AI</h2>
+            <div class="info-block">Version: <span>1.0.0 Enterprise</span></div>
+            <div class="info-block">Powered by <span>Fiberone Limited</span></div>
+
+            <button type="submit" class="btn-save">Save Settings</button>
+            <a href="index.php" class="back-link">← Back to Chat</a>
+        </form>
     </div>
-
-    <div class="section">
-        <h2>Appearance</h2>
-        <label><input type="radio" name="theme" value="light"> Light</label>
-        <label><input type="radio" name="theme" value="dark"> Dark</label>
-        <label><input type="radio" name="theme" value="system" checked> System Default</label>
-    </div>
-
-    <div class="section">
-        <h2>AI Response Style</h2>
-        <label><input type="radio" name="response_style" value="concise"> Concise</label>
-        <label><input type="radio" name="response_style" value="balanced" checked> Balanced</label>
-        <label><input type="radio" name="response_style" value="detailed"> Detailed</label>
-    </div>
-
-    <div class="section">
-        <h2>About FOB-AI</h2>
-        <p>Version: 1.0.2 Enterprise</p>
-        <p>Powered by Fiberone Limited</p>
-    </div>
-
-    <button type="button" onclick="saveSettings()">Save Settings</button>
-    <a href="chat.php" class="back-link">← Back to Chat</a>
-</div>
-
-<div id="toast" class="toast">Settings saved successfully</div>
-
-<script>
-const isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
-const serverTheme = "<?php echo htmlspecialchars($user['theme'] ?? 'system'); ?>";
-const serverStyle = "<?php echo htmlspecialchars($user['response_style'] ?? 'balanced'); ?>";
-
-function applyTheme(theme) {
-    document.body.classList.remove("dark-mode");
-    if (theme === "dark") {
-        document.body.classList.add("dark-mode");
-    } else if (theme === "system") {
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add("dark-mode");
-        }
-    }
-}
-
-const currentTheme = isLoggedIn && serverTheme !== '' ? serverTheme : (localStorage.getItem("theme") || "system");
-const currentStyle = isLoggedIn && serverStyle !== '' ? serverStyle : (localStorage.getItem("response_style") || "balanced");
-
-applyTheme(currentTheme);
-
-const themeRadio = document.querySelector(`input[name="theme"][value="${currentTheme}"]`);
-if (themeRadio) themeRadio.checked = true;
-
-const styleRadio = document.querySelector(`input[name="response_style"][value="${currentStyle}"]`);
-if (styleRadio) styleRadio.checked = true;
-
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.className = "toast success";
-    toast.style.display = "block";
-    setTimeout(() => {
-        toast.style.display = "none";
-    }, 3000);
-}
-
-function saveSettings() {
-    const theme = document.querySelector('input[name="theme"]:checked').value;
-    const responseStyle = document.querySelector('input[name="response_style"]:checked').value;
-
-    localStorage.setItem("theme", theme);
-    localStorage.setItem("response_style", responseStyle);
-    applyTheme(theme);
-
-    if (!isLoggedIn) {
-        showToast("Settings saved locally");
-        return;
-    }
-
-    fetch("save_user_settings.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "theme=" + encodeURIComponent(theme) + "&response_style=" + encodeURIComponent(responseStyle)
-    })
-    .then(response => {
-        if (response.ok) {
-            showToast("Settings saved successfully");
-        } else {
-            showToast("Failed to save settings to server");
-        }
-    })
-    .catch(() => {
-        showToast("Network error occurred");
-    });
-}
-</script>
-
 </body>
 </html>
