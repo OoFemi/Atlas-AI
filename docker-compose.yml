@@ -1,0 +1,75 @@
+services:
+  atlas-app:
+    image: oofemi/fob-ai-app:latest
+    container_name: atlas-enterprise-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8082:80"
+    environment:
+      - DB_HOST=atlas-mysql
+      - DB_USER=atlas_user
+      - DB_PASS=Fob123
+      - DB_NAME=atlas_ai
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/ask-ai
+      - WEBHOOK_URL=http://n8n:5678/webhook/ask-ai
+    depends_on:
+      - db
+      - ollama
+      - n8n
+      - qdrant
+
+  db:
+    image: mysql:8.0
+    container_name: atlas-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: your_secure_root_password
+      MYSQL_DATABASE: atlas_ai
+      MYSQL_USER: atlas_user
+      MYSQL_PASSWORD: Fob123
+    volumes:
+      - atlas_db_data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_data:/root/.ollama
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=0.0.0.0
+      - WEBHOOK_URL=http://102.67.18.9:5678/
+      - N8N_SECURE_COOKIE=false
+      - N8N_RESTRICT_FILE_ACCESS_TO=/home/node/files
+      - N8N_ENCRYPTION_KEY=/rv1bwWJmudMa476cy8E9A2R7v13FtNF
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./files:/home/node/files
+
+volumes:
+  atlas_db_data:
+  ollama_data:
+  n8n_data:
+  qdrant_data:
