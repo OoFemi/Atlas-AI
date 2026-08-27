@@ -1,0 +1,57 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Segoe UI,sans-serif;
+    background:#f4f6f9;
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:250px;
+    height:100vh;
+
+    background:#001845;
+
+    padding:20px;
+}
+
+.sidebar h2{
+    color:white;
+    margin-bottom:25px;
+}
+
+.sidebar button{
+    width:100%;
+    height:45px;
+
+    display:block;
+
+    margin-bottom:10px;
+
+    border:none;
+    border-radius:8px;
+
+    background:#4da3ff;
+    color:white;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:600;
+}
+
+.logout-btn{
+    background:#e74c3c !important;
+}
+
+.content{
+    margin-left:250px;
+    padding:30px;
+}

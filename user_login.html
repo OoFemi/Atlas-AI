@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fob AI Login</title>
+
+<style>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #020b35, #08134d);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.login-card{
+    width: 600px;
+    background: #1f295f;
+    padding: 60px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+h1{
+    font-size: 64px;
+    margin-bottom: 10px;
+}
+
+.subtitle{
+    font-size: 20px;
+    color: #d6dcff;
+    margin-bottom: 25px;
+}
+
+.description{
+    color: #eef1ff;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+input{
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.login-btn{
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #4da3ff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.login-btn:hover{
+    background: #2d89ef;
+}
+
+.guest-btn{
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #4da3ff;
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+.guest-btn:hover{
+    background: rgba(77, 163, 255, 0.1);
+}
+
+.notice{
+    margin-top: 25px;
+    color: #cfd6ff;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer{
+    margin-top: 25px;
+    color: #cfd6ff;
+    font-size: 12px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="login-card">
+
+    <h1>Fob AI</h1>
+
+    <div class="subtitle">
+        Enterprise AI Knowledge Platform
+    </div>
+
+    <div class="description">
+        Secure access to company knowledge,
+        departmental documents and AI-powered
+        business intelligence.
+    </div>
+
+    <form action="user_login.php" method="POST">
+        <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            required>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required>
+
+        <button
+            type="submit"
+            class="login-btn">
+            Sign In
+        </button>
+    </form>
+
+    <a href="chat.html" class="guest-btn">
+        Continue as Guest
+    </a>
+
+    <div class="notice">
+        Authorized use only.<br>
+        Activity may be monitored and audited.
+    </div>
+
+    <div class="footer">
+        Powered by Fob Support<br>
+        Fob AI v1.0
+    </div>
+
+</div>
+
+</body>
+</html>

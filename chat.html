@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fob AI Enterprise Dashboard</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Segoe UI, sans-serif;
+    background: #1e1f2b;
+    color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* SIDEBAR STYLES */
+.sidebar {
+    width: 280px;
+    background: #11131d;
+    border-right: 1px solid #2f3246;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.sidebar img {
+    width: 160px;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+
+.sidebar-user {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #181b2a;
+    border-radius: 10px;
+    border: 1px solid #2f3246;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #a0aec0;
+}
+
+.sidebar-user strong {
+    color: #4da3ff;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.nav-section {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.nav-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    margin-top: 15px;
+    padding-left: 5px;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: transparent;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.sidebar button:hover {
+    background: #252a41;
+    color: white;
+}
+
+.sidebar button.active {
+    background: #4da3ff;
+    color: white;
+    font-weight: 500;
+}
+
+.sidebar button.primary-action {
+    background: #4da3ff;
+    color: white;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.sidebar button.primary-action:hover {
+    background: #3b82f6;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.5;
+    padding-top: 15px;
+    border-top: 1px solid #2f3246;
+}
+
+/* MAIN VIEW CONTAINER */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #1e1f2b;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.header {
+    height: 70px;
+    background: #11131d;
+    border-bottom: 1px solid #2f3246;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+#aiTitle {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.header-badge {
+    background: rgba(77, 163, 255, 0.1);
+    color: #4da3ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    border: 1px solid rgba(77, 163, 255, 0.2);
+}
+
+/* VIEWS WRAPPER */
+.view-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.app-view {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.app-view.active {
+    display: flex;
+}
+
+/* CHAT VIEW STYLES */
+.chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.message {
+    max-width: 700px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.ai {
+    background: #2b2f46;
+    line-height: 1.6;
+    align-self: flex-start;
+}
+
+.user {
+    background: #4da3ff;
+    align-self: flex-end;
+}
+
+.input-area {
+    display: flex;
+    padding: 20px;
+    background: #11131d;
+    border-top: 1px solid #2f3246;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #1e1f2b;
+    color: white;
+    outline: none;
+}
+
+.input-area input:focus {
+    border: 1px solid #4da3ff;
+}
+
+.input-area button {
+    padding: 14px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #4da3ff;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.clear-btn {
+    background: #ef4444 !important;
+}
+
+.clear-btn:hover {
+    background: #dc2626 !important;
+}
+
+.welcome-card {
+    width: 900px;
+    max-width: 90%;
+}
+
+/* DASHBOARD METRICS & PANEL VIEWS */
+.dashboard-content {
+    padding: 30px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-card {
+    background: #11131d;
+    border: 1px solid #2f3246;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.metric-card h3 {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-card .value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #4da3ff;
+}
+
+.panel-card {
+    background: #11131d;
+    border: 1px solid #2f3246;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.panel-card h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.panel-card p {
+    color: #94a3b8;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* LIGHT MODE */
+body.light-mode {
+    background: #f9fafb;
+    color: #111827;
+}
+
+body.light-mode .sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+}
+
+body.light-mode .sidebar-user {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #666;
+}
+
+body.light-mode .sidebar-user strong {
+    color: #111827 !important;
+}
+
+body.light-mode .sidebar button {
+    color: #4b5563;
+}
+
+body.light-mode .sidebar button:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+body.light-mode .sidebar button.active {
+    background: #4da3ff;
+    color: white;
+}
+
+body.light-mode .sidebar-footer {
+    border-top: 1px solid #e5e7eb;
+    color: #666;
+}
+
+body.light-mode .header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body.light-mode .main {
+    background: #f9fafb;
+}
+
+body.light-mode .chat {
+    background: #f9fafb;
+}
+
+body.light-mode .ai {
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+}
+
+body.light-mode .user {
+    background: #4da3ff;
+    color: white;
+}
+
+body.light-mode .input-area {
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+}
+
+body.light-mode .input-area input {
+    background: #f9fafb;
+    color: #111827;
+    border: 1px solid #d1d5db;
+}
+
+body.light-mode #aiTitle {
+    color: #111827;
+}
+
+body.light-mode .metric-card, 
+body.light-mode .panel-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+body.light-mode .metric-card .value {
+    color: #2563eb;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ENTERPRISE SIDEBAR -->
+<div class="sidebar">
+    <img src="logo.png" alt="Logo">
+    
+    <div id="sidebarUser" class="sidebar-user">
+        Welcome,<br>
+        <strong>Guest User</strong>
+    </div>
+
+    <button class="primary-action" onclick="switchView('chatView'); newChat();">
+        + New Chat
+    </button>
+
+    <div class="nav-section">
+        <div class="nav-label">Workspace</div>
+        <button id="navChat" class="active" onclick="switchView('chatView')">
+            💬 Fob AI Chat
+        </button>
+        <button id="navDashboard" onclick="switchView('dashboardView')">
+            📊 Executive Dashboard
+        </button>
+
+        <div class="nav-label">System</div>
+        <button onclick="openSettings()">
+            ⚙️ Settings
+        </button>
+        <button id="adminNavBtn" onclick="window.location.href='admin.html'" style="display:none;">
+            🛡️ Admin Console
+        </button>
+        <button id="loginBtn">
+            🔐 Login
+        </button>
+    </div>
+
+    <div class="sidebar-footer">
+        <strong>Fob AI v1.0 Enterprise</strong><br>
+        Powered by Fob Support
+    </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="main">
+    <div class="header">
+        <h1 id="aiTitle">Fob AI Enterprise Suite</h1>
+        <div class="header-badge" id="headerWorkspaceBadge">Secure Environment</div>
+    </div>
+
+    <div class="view-container">
+        <!-- VIEW 1: CHAT INTERFACE (PRESERVED FUNCTIONALITY) -->
+        <div id="chatView" class="app-view active">
+            <div id="chat" class="chat"></div>
+            <div class="input-area">
+                <input id="question" placeholder="Ask Fob AI anything..." onkeydown="if(event.key==='Enter') send()">
+                <button onclick="send()">Send</button>
+                <button class="clear-btn" onclick="clearChat()">🗑️  Clear</button>
+            </div>
+        </div>
+
+        <!-- VIEW 2: DASHBOARD PANEL -->
+        <div id="dashboardView" class="app-view">
+            <div class="dashboard-content">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Active Queries Today</h3>
+                        <div class="value">1,248</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>System Status</h3>
+                        <div class="value" style="color: #10b981;">Optimal</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Connected Node</h3>
+                        <div class="value" style="font-size: 20px; padding-top: 6px;">10.106.10.243</div>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2>Fob Support Operations Overview</h2>
+                    <p>Welcome to the Fob AI Enterprise Management Console. This environment routes real-time context-aware webhook requests securely across internal cluster endpoints. Use the sidebar navigation to transition between the active AI chat session, administrative parameters, and user account configurations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+
+// Navigation View Switcher
+function switchView(viewId) {
+    document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-section button').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(viewId).classList.add('active');
+    
+    if(viewId === 'chatView') {
+        document.getElementById('navChat').classList.add('active');
+        document.getElementById('aiTitle').textContent = "Fob AI Enterprise Suite";
+    } else if(viewId === 'dashboardView') {
+        document.getElementById('navDashboard').classList.add('active');
+        document.getElementById('aiTitle').textContent = "Executive Dashboard";
+    }
+}
+
+// Session Initialization and Role Handling
+fetch("get_session.php")
+.then(response => response.json())
+.then(data => {
+    const sidebar = document.getElementById("sidebarUser");
+    const adminBtn = document.getElementById("adminNavBtn");
+
+    if(sidebar){
+        if(data.logged_in){
+            sidebar.innerHTML = "Welcome,<br><strong>" + data.name + "</strong><br><span style='font-size:11px; color:#4da3ff;'>Group: " + data.group_id + "</span>";
+            
+            // Show admin button conditionally based on group or privileges if applicable
+            if(adminBtn) adminBtn.style.display = "flex";
+        }else{
+            sidebar.innerHTML = "Welcome,<br><strong>Guest User</strong>";
+            if(adminBtn) adminBtn.style.display = "none";
+        }
+    }
+});
+
+window.onload = function(){
+    const historyEnabled = localStorage.getItem("chatHistory") === "true";
+    const savedChat = localStorage.getItem("savedChat");
+
+    if(historyEnabled && savedChat && savedChat.trim() !== ""){
+        chat.innerHTML = savedChat;
+    } else {
+        fetch("get_session.php")
+        .then(response => response.json())
+        .then(data => {
+            const name = data.logged_in ? data.name : "there";
+            const welcome = addMessage(
+                "👋 Welcome back, " + name + ".<br><br>" +
+                "I am Olaah, your Fob AI assistant.<br><br>" +
+                "How can I help you today?<br><br>" +
+                "<strong>Try asking:</strong><br><br>" +
+                "📘 Tell me about Fob Support Limited<br>" +
+                "✉️  How can I access dualmon<br>" +
+                "📊 Generate a report<br>" +
+                "🧠 Explain a concept",
+                "ai"
+            );
+            welcome.classList.add("welcome-card");
+        });
+    }
+};
+
+function addMessage(text, type){
+    const div = document.createElement("div");
+    div.className = "message " + type;
+
+    if(type === "ai"){
+        div.innerHTML = text;
+    } else {
+        div.textContent = text;
+    }
+
+    chat.appendChild(div);
+
+    if(localStorage.getItem("chatHistory") === "true"){
+        localStorage.setItem("savedChat", chat.innerHTML);
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+}
+
+function clearChat(){
+    chat.innerHTML = "";
+    localStorage.removeItem("savedChat");
+}
+
+function newChat(){
+    chat.innerHTML = "";
+    addMessage("✨ New chat started.<br><br>How can I help you today?", "ai");
+}
+
+function openSettings(){
+    window.location.href = "user_settings.php";
+}
+
+async function send(){
+    const input = document.getElementById("question");
+    const question = input.value.trim();
+
+    if(!question){
+        return;
+    }
+
+    addMessage(question, "user");
+    input.value = "";
+
+    const typing = addMessage("🤔 Thinking...", "ai");
+
+    try {
+        const session = await fetch("get_session.php");
+        const user = await session.json();
+
+        const response = await fetch(
+            "http://10.106.10.243:5678/webhook/ask-ai",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    question: question,
+                    name: user.name,
+                    group_id: user.group_id,
+                    logged_in: user.logged_in
+                })
+            }
+        );
+
+        if(!response.ok){
+            throw new Error("HTTP " + response.status);
+        }
+
+        const result = await response.text();
+        typing.remove();
+        addMessage(result, "ai");
+
+    } catch(error) {
+        console.error(error);
+        typing.remove();
+        addMessage("❌ Unable to reach Fob AI server.", "ai");
+    }
+}
+
+// Theme Persistence
+const theme = localStorage.getItem("theme");
+if(theme === "light"){
+    document.body.classList.add("light-mode");
+}
+
+// Login/Logout Button Handler Synchronization
+fetch("get_session.php")
+.then(r => r.json())
+.then(data => {
+    const btn = document.getElementById("loginBtn");
+
+    if(data.logged_in){
+        btn.innerHTML = "🔐 Logout";
+        btn.onclick = function(){
+            window.location = "logout.php";
+        };
+    } else {
+        btn.innerHTML = "🔐  Login";
+        btn.onclick = function(){
+            window.location = "user_login.html";
+        };
+    }
+});
+</script>
+
+</body>
+</html>
